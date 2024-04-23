@@ -17,7 +17,7 @@ return {
       terminal_mappings = true, -- whether or not the open mapping applies in the opened terminals
       persist_size = true,
       persist_mode = true, -- if set to true (default) the previous terminal mode will be remembered
-      direction = 'float',
+      direction = 'horizontal',
       close_on_exit = true, -- close the terminal window when the process exits
       shell = vim.o.shell,
       auto_scroll = true, -- automatically scroll to the bottom on terminal output
@@ -45,8 +45,8 @@ return {
     -- if you only want these mappings for toggle term use term://*toggleterm#* instead
 
     local Terminal = require('toggleterm.terminal').Terminal
-    local lazygit = Terminal:new { cmd = 'lazygit', hidden = true }
-    local newTerm = Terminal:new { hidden = true }
+    local lazygit = Terminal:new { cmd = 'lazygit', hidden = true, direction = 'float' }
+    local newTerm = Terminal:new { hidden = true, direction = 'float' }
 
     function _LAZYGIT_TOGGLE()
       lazygit:toggle()
@@ -56,8 +56,7 @@ return {
       newTerm:toggle()
     end
 
-    vim.keymap.set('n', '<C-l>', [[<cmd>lua _LAZYGIT_TOGGLE()<CR>]], { noremap = true, silent = true })
-    vim.keymap.set('n', '<C-k>', [[<cmd>lua _NEW_TERM_TOGGLE()<CR>]], { noremap = true, silent = true })
-
+    vim.keymap.set({ 'n', 'i', 't' }, '<C-l>', [[<cmd>lua _LAZYGIT_TOGGLE()<CR>]], { noremap = true, silent = true })
+    vim.keymap.set({ 'n', 't' }, '<C-k>', [[<cmd>lua _NEW_TERM_TOGGLE()<CR>]], { noremap = true, silent = true })
   end,
 }
