@@ -46,17 +46,17 @@ return {
 
     local Terminal = require('toggleterm.terminal').Terminal
     local lazygit = Terminal:new { cmd = 'lazygit', hidden = true, direction = 'float' }
-    local newTerm = Terminal:new { hidden = true, direction = 'float' }
+    local newTmux = Terminal:new { cmd = 'tmux', hidden = true, direction = 'float' }
 
     function _LAZYGIT_TOGGLE()
       lazygit:toggle()
     end
 
-    function _NEW_TERM_TOGGLE()
-      newTerm:toggle()
+    function _NEW_TMUX_TOGGLE()
+      newTmux:toggle()
     end
 
     vim.keymap.set({ 'n', 'i', 't' }, '<C-l>', [[<cmd>lua _LAZYGIT_TOGGLE()<CR>]], { noremap = true, silent = true })
-    vim.keymap.set({ 'n', 't' }, '<C-k>', [[<cmd>lua _NEW_TERM_TOGGLE()<CR>]], { noremap = true, silent = true })
+    vim.keymap.set({ 'n', 't' }, '<C-k>', [[<cmd>lua _NEW_TMUX_TOGGLE()<CR>]], { noremap = true, silent = true })
   end,
 }

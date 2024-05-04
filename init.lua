@@ -103,6 +103,8 @@ vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
 vim.opt.relativenumber = true
+vim.opt.shiftwidth = 2
+vim.opt.tabstop = 2
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -154,6 +156,8 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+vim.opt.autochdir = false
+vim.g.root_spec = { 'cwd' }
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -247,15 +251,69 @@ require('lazy').setup({
   -- See `:help gitsigns` to understand what the configuration keys do
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
-    opts = {
-      signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
-      },
-    },
+    config = function()
+      require('gitsigns').setup {
+        signs = {
+          add = { text = '+' },
+          change = { text = '~' },
+          delete = { text = '_' },
+          topdelete = { text = '‾' },
+          changedelete = { text = '~' },
+        },
+        on_attach = function(bufnr)
+          local gitsigns = require 'gitsigns'
+
+          local function map(mode, l, r, opts)
+            opts = opts or {}
+            opts.buffer = bufnr
+            vim.keymap.set(mode, l, r, opts)
+          end
+
+          -- Navigation
+          map('n', ']g', function()
+            if vim.wo.diff then
+              vim.cmd.normal { ']c', bang = true }
+            else
+              gitsigns.nav_hunk 'next'
+            end
+          end, { desc = 'Next [G]it change' })
+
+          map('n', '[g', function()
+            if vim.wo.diff then
+              vim.cmd.normal { '[c', bang = true }
+            else
+              gitsigns.nav_hunk 'prev'
+            end
+          end, { desc = 'Previous [G]it change' })
+
+          -- Actions
+          map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'Stage [H]unk' })
+          map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'Reset [H]unk' })
+          map('v', '<leader>hs', function()
+            gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
+          end, { desc = 'Stage [H]unk' })
+          map('v', '<leader>hr', function()
+            gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
+          end, { desc = 'Reset [H]unk' })
+          map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'Stage [B]uffer' })
+          map('n', '<leader>hu', gitsigns.undo_stage_hunk, { desc = '[U]ndo stage hunk' })
+          map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'Reset [B]uffer' })
+          map('n', '<leader>hp', gitsigns.preview_hunk, { desc = '[P]review hunk' })
+          map('n', '<leader>hb', function()
+            gitsigns.blame_line { full = true }
+          end, { desc = '[B]lame line' })
+          map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = 'Toggle [T]oggle [B]lame' })
+          map('n', '<leader>hd', gitsigns.diffthis, { desc = '[H]ighlight [D]iff' })
+          map('n', '<leader>hD', function()
+            gitsigns.diffthis '~'
+          end, { desc = '[H]ighlight [D]iff (vertical)' })
+          map('n', '<leader>td', gitsigns.toggle_deleted, { desc = '[T]oggle [D]eleted' })
+
+          -- Text object
+          map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'Select [H]unk' })
+        end,
+      }
+    end,
   },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
@@ -288,6 +346,9 @@ require('lazy').setup({
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
         ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
         ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+        ['<leader>n'] = { name = '[N]oice + swap [N]ext', _ = 'which_key_ignore' },
+        ['<leader>p'] = { name = 'Swap [P]revious', _ = 'which_key_ignore' },
+        ['<leader>x'] = { name = 'Trouble', _ = 'which_key_ignore' },
       }
       -- visual mode
       require('which-key').register({
@@ -364,9 +425,24 @@ require('lazy').setup({
         --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
         --   },
         -- },
+
         -- pickers = {}
         defaults = {
           path_display = { 'smart' },
+          file_ignore_patterns = { 'node_modules', '.git', '.cache', '.venv', '.vscode', '.idea', '.DS_Store' },
+          dynamic_preview_title = true,
+          layout_config = {
+            width = 0.95,
+            -- other layout configuration here
+          },
+          mappings = {
+            n = {
+              ['<c-b>'] = require('telescope.actions').delete_buffer,
+            },
+            i = {
+              ['<c-b>'] = require('telescope.actions').delete_buffer,
+            },
+          },
         },
         extensions = {
           ['ui-select'] = {
@@ -678,7 +754,8 @@ require('lazy').setup({
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
+        javascript = { { 'prettierd', 'prettier' } },
+        typescript = { { 'prettierd', 'prettier' } },
       },
     },
   },
@@ -844,38 +921,6 @@ require('lazy').setup({
 
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
-    end,
-  },
-  { -- Highlight, edit, and navigate code
-    'nvim-treesitter/nvim-treesitter',
-    build = ':TSUpdate',
-    opts = {
-      ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
-    config = function(_, opts)
-      -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-
-      -- Prefer git instead of curl in order to improve connectivity in some environments
-      require('nvim-treesitter.install').prefer_git = true
-      ---@diagnostic disable-next-line: missing-fields
-      require('nvim-treesitter.configs').setup(opts)
-
-      -- There are additional nvim-treesitter modules that you can use to interact
-      -- with nvim-treesitter. You should go explore a few and see what interests you:
-      --
-      --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-      --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-      --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
 
