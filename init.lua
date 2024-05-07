@@ -670,6 +670,7 @@ require('lazy').setup({
         -- But for many setups, the LSP (`tsserver`) will work just fine
         -- tsserver = {},
         --
+        kotlin_language_server = {},
 
         lua_ls = {
           -- cmd = {...},
@@ -754,6 +755,7 @@ require('lazy').setup({
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
+        kotlin = { { 'ktlint', 'ktfmt' } },
         javascript = { { 'prettierd', 'prettier' } },
         typescript = { { 'prettierd', 'prettier' } },
       },

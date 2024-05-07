@@ -34,11 +34,15 @@ return {
     require('flutter-tools').setup_project {
       {
         name = 'Dev simulator', -- an arbitrary name that you provide so you can recognise this config
-        flavor = 'DevFlavor', -- your flavour
+        flavor = 'dev', -- your flavour
         target = 'lib/main.dart', -- your target
         dart_define = {
-          environment = 'DEV'
+          environment = 'DEV',
         },
+      },
+      {
+        name = 'Tally dev', -- an arbitrary name that you provide so you can recognise this config
+        target = 'lib/main.dart', -- your target
       },
       {
         name = 'Web',
