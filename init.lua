@@ -106,7 +106,7 @@ vim.opt.relativenumber = true
 vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 
--- Enable mouse mode, can be useful for resizing splits for example!
+-- Enable mouse mode, can be useful for resizing splits for example!hig
 vim.opt.mouse = 'a'
 
 -- Don't show the mode, since it's already in the status line
@@ -438,9 +438,14 @@ require('lazy').setup({
           mappings = {
             n = {
               ['<c-b>'] = require('telescope.actions').delete_buffer,
+              ['<c-j>'] = require('telescope.actions').cycle_history_next,
+              ['<c-k>'] = require('telescope.actions').cycle_history_prev,
             },
             i = {
               ['<c-b>'] = require('telescope.actions').delete_buffer,
+              ['<c-a>'] = require('telescope-live-grep-args.actions').quote_prompt(),
+              ['<c-j>'] = require('telescope.actions').cycle_history_next,
+              ['<c-k>'] = require('telescope.actions').cycle_history_prev,
             },
           },
         },
@@ -461,6 +466,20 @@ require('lazy').setup({
               },
             },
           },
+          fzf = {
+            fuzzy = true, -- false will only do exact matching
+            override_generic_sorter = true, -- override the generic sorter
+            override_file_sorter = true, -- override the file sorter
+            case_mode = 'smart_case', -- or "ignore_case" or "respect_case"
+            -- the default case_mode is "smart_case"
+          },
+          live_grep_args = {
+            auto_quoting = true, -- enable/disable auto-quoting
+            --   -- define mappings, e.g.
+            --   -- theme = "dropdown", -- use dropdown theme
+            --   -- theme = { }, -- use own theme spec
+            --   -- layout_config = { mirror=true }, -- mirror preview pane
+          },
         },
       }
 
@@ -470,20 +489,42 @@ require('lazy').setup({
       pcall(require('telescope').load_extension, 'file_browser')
       pcall(require('telescope').load_extension, 'projects')
       require('telescope').load_extension 'flutter'
+      require('telescope').load_extension 'live_grep_args'
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
-      vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
-      vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<c-p>', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
-      vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
-      vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
-      vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
-      vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      local themes = require 'telescope.themes'
+
+      vim.keymap.set('n', '<leader>sh', function()
+        builtin.help_tags(themes.get_ivy())
+      end, { desc = '[S]earch [H]elp' })
+      vim.keymap.set('n', '<leader>sk', function()
+        builtin.keymaps(themes.get_ivy())
+      end, { desc = '[S]earch [K]eymaps' })
+      vim.keymap.set('n', '<leader>sf', function()
+        builtin.find_files(themes.get_ivy())
+      end, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>ss', function()
+        builtin.builtin(themes.get_ivy())
+      end, { desc = '[S]earch [S]elect Telescope' })
+      vim.keymap.set('n', '<leader>sw', function()
+        builtin.grep_string(themes.get_ivy())
+      end, { desc = '[S]earch current [W]ord' })
+      vim.keymap.set('n', '<leader>sg', function()
+        require('telescope').extensions.live_grep_args.live_grep_args(themes.get_ivy())
+      end, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>sd', function()
+        builtin.diagnostics(themes.get_ivy())
+      end, { desc = '[S]earch [D]iagnostics' })
+      vim.keymap.set('n', '<leader>sr', function()
+        builtin.resume(themes.get_ivy())
+      end, { desc = '[S]earch [R]esume' })
+      vim.keymap.set('n', '<leader>s.', function()
+        builtin.oldfiles(themes.get_ivy())
+      end, { desc = '[S]earch Recent Files ("." for repeat)' })
+      vim.keymap.set('n', '<leader><leader>', function()
+        builtin.buffers(themes.get_ivy())
+      end, { desc = '[ ] Find existing buffers' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -660,7 +701,7 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
+        pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -751,13 +792,18 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'isort', 'black' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         kotlin = { { 'ktlint', 'ktfmt' } },
         javascript = { { 'prettierd', 'prettier' } },
         typescript = { { 'prettierd', 'prettier' } },
+        typescriptreact = { { 'prettierd', 'prettier' } },
+        javascriptreact = { { 'prettierd', 'prettier' } },
+        json = { { 'prettierd', 'prettier' } },
+        html = { { 'prettierd', 'prettier' } },
+        css = { { 'prettierd', 'prettier' } },
       },
     },
   },
@@ -970,4 +1016,5 @@ require('lazy').setup({
   },
 })
 require 'custom.mappings'
+require 'custom.macros'
 require 'custom.env'

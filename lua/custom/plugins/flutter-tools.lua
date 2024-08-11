@@ -19,6 +19,7 @@ return {
           enableSnippets = true,
           documentation = 'full',
           analysisExcludedFolders = { '.dart_tool/**', '.dart_plugins/**', 'build/**', 'ios/', 'android/', '$HOME/.pub-cache/**', '.fvm/**' },
+          flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
         },
       },
       dev_log = {

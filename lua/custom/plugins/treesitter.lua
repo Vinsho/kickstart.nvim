@@ -1,9 +1,9 @@
 return { -- Highlight, edit, and navigate code
   'nvim-treesitter/nvim-treesitter',
-  commit = 'f2778bd1a28b74adf5b1aa51aa57da85adfa3d16',
   build = ':TSUpdate',
+  tag = 'v0.9.2',
   dependencies = {
-    { 'nvim-treesitter/nvim-treesitter-textobjects', commit = '35a60f093fa15a303874975f963428a5cd24e4a0' },
+    { 'nvim-treesitter/nvim-treesitter-textobjects'},
   },
   opts = {
     ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc', 'dart', 'json', 'javascript', 'typescript', 'python' },
@@ -16,20 +16,11 @@ return { -- Highlight, edit, and navigate code
       --  the list of additional_vim_regex_highlighting and disabled languages for indent.
       additional_vim_regex_highlighting = { 'ruby' },
     },
-    indent = { enable = true, disable = { 'ruby' } },
-    incremental_selection = {
-      enable = true,
-      keymaps = {
-        init_selection = '<c-space>', -- set to `false` to disable one of the mappings
-        node_incremental = '<c-space>',
-        scope_incremental = false,
-        node_decremental = '<bs>',
-      },
-    },
+    indent = { enable = true, disable = { 'ruby', 'dart'} },
     textobjects = {
       select = {
         enable = true,
-        -- disable = {'dart'},
+        disable = {'dart'},
 
         -- Automatically jump forward to textobj, similar to targets.vim
         lookahead = true,
@@ -68,7 +59,7 @@ return { -- Highlight, edit, and navigate code
       },
       swap = {
         enable = true,
-        -- disable = {'dart'},
+        disable = {'dart'},
         swap_next = {
           ['<leader>na'] = '@parameter.inner', -- swap parameters/argument with next
           ['<leader>n:'] = '@property.outer', -- swap object property with next
@@ -82,7 +73,7 @@ return { -- Highlight, edit, and navigate code
       },
       move = {
         enable = true,
-        -- disable = {'dart'},
+        disable = {'dart'},
         set_jumps = true, -- whether to set jumps in the jumplist
         goto_next_start = {
           [']f'] = { query = '@call.outer', desc = 'Next function call start' },
