@@ -426,7 +426,11 @@ require('lazy').setup({
         --   },
         -- },
 
-        -- pickers = {}
+        pickers = {
+          find_files = {
+            hidden = true,
+          },
+        },
         defaults = {
           path_display = { 'smart' },
           file_ignore_patterns = { 'node_modules', '.git', '.cache', '.venv', '.vscode', '.idea', '.DS_Store' },
@@ -829,10 +833,10 @@ require('lazy').setup({
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
           -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
+          'rafamadriz/friendly-snippets',
+          config = function()
+            require('luasnip.loaders.from_vscode').lazy_load()
+          end,
           -- },
         },
       },
@@ -843,6 +847,8 @@ require('lazy').setup({
       --  into multiple repos for maintenance purposes.
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
+      'luckasRanarison/tailwind-tools.nvim',
+      'onsails/lspkind-nvim',
     },
     config = function()
       -- See `:help cmp`
@@ -1018,3 +1024,7 @@ require('lazy').setup({
 require 'custom.mappings'
 require 'custom.macros'
 require 'custom.env'
+
+-- Enable :set spell on startup
+vim.o.spell = true
+vim.o.spellcapcheck = ''

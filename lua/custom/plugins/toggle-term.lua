@@ -29,6 +29,9 @@ return {
         -- not natively supported but implemented in this plugin.
         border = 'curved',
       },
+      on_create = function(term)
+        vim.wo.spell = false
+      end,
     }
 
     -- function _G.set_terminal_keymaps()

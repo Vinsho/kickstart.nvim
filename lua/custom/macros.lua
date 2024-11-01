@@ -1,2 +1,2 @@
- vim.fn.setreg('i', "wwcT'@tymbewwwct/")
+ vim.fn.setreg('i', "wwcT'@tymbewf/ct/")
 
